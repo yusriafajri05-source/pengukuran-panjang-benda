@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Ukur Panjang - Matematika SD Kelas 3</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka & Quicksand untuk tampilan ceria ramah anak -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandYellow: '#FFD166',
+                        brandGreen: '#06D6A0',
+                        brandBlue: '#118AB2',
+                        brandPink: '#EF476F',
+                        brandPurple: '#8338EC',
+                        brandDark: '#073B4C'
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        quicksand: ['Quicksand', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #F4F7FE;
+            user-select: none;
+        }
+        h1, h2, h3, h4, .font-fun {
+            font-family: 'Fredoka', cursive;
+        }
+        .bounce-hover:hover {
+            transform: translateY(-4px) scale(1.02);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-game {
+            box-shadow: 0px 6px 0px rgba(0, 0, 0, 0.2);
+            transition: all 0.1s ease;
+        }
+        .btn-game:active {
+            transform: translateY(4px);
+            box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.2);
+        }
+        /* Glassmorphic card styling */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 4px solid #FFF;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        }
+        /* Ruler Tick Marks */
+        .ruler-container {
+            background-color: #FFD166;
+            border: 3px solid #073B4C;
+            position: relative;
+        }
+        .ruler-tick {
+            position: absolute;
+            bottom: 0;
+            width: 2px;
+            background-color: #073B4C;
+        }
+        .ruler-tick.cm {
+            height: 25px;
+            width: 3px;
+        }
+        .ruler-tick.mm {
+            height: 12px;
+        }
+        /* Drag and Drop Styling */
+        .draggable-item {
+            cursor: grab;
+            touch-action: none;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+        .drop-zone-active {
+            border-color: #06D6A0 !important;
+            background-color: #E6FFFA !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-brandDark flex flex-col justify-between overflow-x-hidden">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="bg-white border-b-4 border-yellow-400 sticky top-0 z-50 shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between flex-wrap gap-2">
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showSection('beranda')">
+                <div class="bg-brandYellow p-2 rounded-2xl border-2 border-brandDark shadow">
+                    <i class="fa-solid fa-ruler-combined text-2xl text-brandDark"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-brandBlue tracking-wide">SI UKUR! 📏</h1>
+                    <p class="text-xs text-gray-500 font-semibold">Pengukuran Panjang • SD Kelas 3</p>
+                </div>
+            </div>
+
+            <!-- Stats Bar (Score & Badge Preview) -->
+            <div class="flex items-center space-x-3 bg-blue-50 px-4 py-1.5 rounded-full border-2 border-blue-200">
+                <div class="flex items-center space-x-1">
+                    <span class="text-yellow-500 text-lg">⭐</span>
+                    <span id="global-score" class="font-fun text-xl text-brandBlue">0</span>
+                    <span class="text-xs text-gray-400 font-bold">PTS</span>
+                </div>
+                <div class="h-6 w-0.5 bg-blue-200"></div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-xs font-bold text-gray-500">Badge:</span>
+                    <span id="header-badge" class="text-xl">🥉</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Menu Tabs -->
+        <nav class="bg-brandBlue text-white shadow-inner">
+            <div class="max-w-6xl mx-auto px-2 flex justify-between md:justify-center overflow-x-auto space-x-1 py-1 no-scrollbar">
+                <button onclick="showSection('beranda')" class="nav-btn px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1 text-sm transition hover:bg-white/20 whitespace-nowrap active-nav" data-target="beranda">
+                    <span>🏠</span><span>Beranda</span>
+                </button>
+                <button onclick="showSection('materi')" class="nav-btn px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1 text-sm transition hover:bg-white/20 whitespace-nowrap" data-target="materi">
+                    <span>📚</span><span>Materi</span>
+                </button>
+                <button onclick="showSection('simulasi')" class="nav-btn px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1 text-sm transition hover:bg-white/20 whitespace-nowrap" data-target="simulasi">
+                    <span>🔬</span><span>Simulasi</span>
+                </button>
+                <button onclick="showSection('permainan')" class="nav-btn px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1 text-sm transition hover:bg-white/20 whitespace-nowrap" data-target="permainan">
+                    <span>🎮</span><span>Permainan</span>
+                </button>
+                <button onclick="showSection('kuis')" class="nav-btn px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1 text-sm transition hover:bg-white/20 whitespace-nowrap" data-target="kuis">
+                    <span>📝</span><span>Kuis</span>
+                </button>
+                <button onclick="showSection('hasil')" class="nav-btn px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1 text-sm transition hover:bg-white/20 whitespace-nowrap" data-target="hasil">
+                    <span>🏆</span><span>Hasil</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-5xl mx-auto p-4 md:p-6 flex-grow w-full">
+
+        <!-- ================= 1. BERANDA ================= -->
+        <section id="sec-beranda" class="content-section">
+            <div class="glass-card rounded-3xl p-6 md:p-10 text-center relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-10 text-brandBlue pointer-events-none">
+                    <i class="fa-solid fa-ruler-horizontal text-9xl"></i>
+                </div>
+                <div class="inline-block bg-yellow-100 text-yellow-800 text-sm font-bold px-4 py-1 rounded-full border border-yellow-300 mb-4">
+                    ✨ Petualangan Matematika Seru
+                </div>
+                <h2 class="text-3xl md:text-5xl font-extrabold text-brandBlue mb-4">Ayo Belajar Mengukur Panjang Benda! 📏</h2>
+                <p class="text-gray-600 text-base md:text-lg max-w-2xl mx-auto mb-8">
+                    Hai Sahabat Pintar! Mari belajar mengenal satuan panjang baku seperti **Meter (m)** dan **Sentimeter (cm)** sambil bermain game interaktif yang seru!
+                </p>
+
+                <!-- Action Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 text-left">
+                    <div onclick="showSection('materi')" class="p-5 bg-blue-50 rounded-2xl border-2 border-blue-200 hover:border-brandBlue transition cursor-pointer bounce-hover">
+                        <div class="text-3xl mb-2">📚</div>
+                        <h3 class="font-bold text-lg text-brandBlue">Pelajari Materi</h3>
+                        <p class="text-xs text-gray-500">Pahami alat ukur baku dan tangga satuan panjang.</p>
+                    </div>
+                    <div onclick="showSection('simulasi')" class="p-5 bg-emerald-50 rounded-2xl border-2 border-emerald-200 hover:border-brandGreen transition cursor-pointer bounce-hover">
+                        <div class="text-3xl mb-2">🔬</div>
+                        <h3 class="font-bold text-lg text-brandGreen">Uji Simulasi</h3>
+                        <p class="text-xs text-gray-500">Geser benda dan ukur langsung dengan penggaris interaktif!</p>
+                    </div>
+                    <div onclick="showSection('permainan')" class="p-5 bg-purple-50 rounded-2xl border-2 border-purple-200 hover:border-brandPurple transition cursor-pointer bounce-hover">
+                        <div class="text-3xl mb-2">🎮</div>
+                        <h3 class="font-bold text-lg text-brandPurple">Tantangan Game</h3>
+                        <p class="text-xs text-gray-500">Mainkan Open the Box, Drag & Drop, dan Menjodohkan!</p>
+                    </div>
+                </div>
+
+                <button onclick="showSection('materi')" class="btn-game bg-brandPink text-white font-fun text-xl px-8 py-4 rounded-2xl hover:bg-pink-600 transition flex items-center justify-center space-x-3 mx-auto">
+                    <span>Mulai Berpetualang Now!</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= 2. MATERI ================= -->
+        <section id="sec-materi" class="content-section hidden">
+            <div class="glass-card rounded-3xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-brandBlue mb-6 flex items-center space-x-3">
+                    <span>📚</span><span>Materi: Satuan Baku Pengukuran Panjang</span>
+                </h2>
+
+                <!-- Tabs Internal Materi -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <!-- Card 1: Satuan Baku -->
+                    <div class="bg-amber-50 p-5 rounded-2xl border-2 border-amber-200">
+                        <div class="text-4xl mb-2 text-center">📏</div>
+                        <h3 class="font-bold text-lg text-amber-900 text-center mb-2">Apa itu Satuan Baku?</h3>
+                        <p class="text-xs text-amber-800 leading-relaxed">
+                            Satuan baku adalah satuan pengukuran yang <strong>hasilnya selalu sama</strong> untuk siapa saja. 
+                            Contoh alat ukur baku: <strong>Penggaris</strong>, <strong>Meteran Pita</strong>, dan <strong>Meteran Roll</strong>.
+                        </p>
+                    </div>
+
+                    <!-- Card 2: Hubungan m & cm -->
+                    <div class="bg-teal-50 p-5 rounded-2xl border-2 border-teal-200">
+                        <div class="text-4xl mb-2 text-center">🔢</div>
+                        <h3 class="font-bold text-lg text-teal-900 text-center mb-2">Hubungan m dan cm</h3>
+                        <p class="text-xs text-teal-800 leading-relaxed mb-2">
+                            <strong>1 Meter (m) = 100 Sentimeter (cm)</strong>
+                        </p>
+                        <ul class="text-xs text-teal-800 list-disc list-inside space-y-1">
+                            <li>Ukur benda pendek (pensil, penghapus) dengan <strong>cm</strong>.</li>
+                            <li>Ukur benda panjang (pintu, papan tulis) dengan <strong>meter (m)</strong>.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 3: Cara Mengukur -->
+                    <div class="bg-indigo-50 p-5 rounded-2xl border-2 border-indigo-200">
+                        <div class="text-4xl mb-2 text-center">🎯</div>
+                        <h3 class="font-bold text-lg text-indigo-900 text-center mb-2">Cara Mengukur Tepat</h3>
+                        <ol class="text-xs text-indigo-800 list-decimal list-inside space-y-1">
+                            <li>Himpitkan ujung awal benda tepat di angka <strong>0 (Nol)</strong> pada penggaris.</li>
+                            <li>Lihat angka tepat pada ujung akhir benda.</li>
+                            <li>Angka tersebut adalah panjang bendanya!</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Tangga Satuan Visual -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border-2 border-blue-200">
+                    <h3 class="font-bold text-xl text-brandBlue mb-4 text-center">Tangga Satuan Panjang (Fokus Kelas 3: m, dm, cm, mm)</h3>
+                    <div class="flex justify-center items-end space-x-2 md:space-x-4 h-48 py-4">
+                        <div class="bg-brandBlue text-white w-16 md:w-20 h-40 rounded-t-xl flex flex-col items-center justify-center font-bold shadow-md">
+                            <span>Meter</span>
+                            <span class="text-xl">m</span>
+                        </div>
+                        <div class="flex items-center text-brandDark font-bold text-sm">× 10 ➔</div>
+                        <div class="bg-brandGreen text-white w-16 md:w-20 h-32 rounded-t-xl flex flex-col items-center justify-center font-bold shadow-md">
+                            <span>Desi</span>
+                            <span class="text-xl">dm</span>
+                        </div>
+                        <div class="flex items-center text-brandDark font-bold text-sm">× 10 ➔</div>
+                        <div class="bg-brandYellow text-brandDark w-16 md:w-20 h-24 rounded-t-xl flex flex-col items-center justify-center font-bold shadow-md">
+                            <span>Senti</span>
+                            <span class="text-xl">cm</span>
+                        </div>
+                        <div class="flex items-center text-brandDark font-bold text-sm">× 10 ➔</div>
+                        <div class="bg-brandPink text-white w-16 md:w-20 h-16 rounded-t-xl flex flex-col items-center justify-center font-bold shadow-md">
+                            <span>Mili</span>
+                            <span class="text-xl">mm</span>
+                        </div>
+                    </div>
+                    <p class="text-center text-xs text-gray-500 font-semibold mt-2">💡 Catatan Singkat: Setiap turun 1 tangga dikali 10! (1 m = 100 cm)</p>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <button onclick="showSection('simulasi')" class="btn-game bg-brandGreen text-white font-fun text-lg px-6 py-3 rounded-xl hover:bg-emerald-600 transition">
+                        Coba Simulasi Mengukur ➔
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 3. SIMULASI INTERAKTIF ================= -->
+        <section id="sec-simulasi" class="content-section hidden">
+            <div class="glass-card rounded-3xl p-6 md:p-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
+                    <div>
+                        <h2 class="text-3xl font-bold text-brandBlue flex items-center space-x-2">
+                            <span>🔬</span><span>Simulasi Laboratorium Penggaris</span>
+                        </h2>
+                        <p class="text-xs text-gray-500">Ubah ukuran benda & geser posisi penggaris untuk melihat hasilnya secara visual!</p>
+                    </div>
+                    <div class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full border border-purple-300">
+                        Eksperimen Sebab-Akibat
+                    </div>
+                </div>
+
+                <!-- Simulation Workbench Area -->
+                <div class="bg-slate-800 rounded-3xl p-6 text-white shadow-inner mb-6 relative overflow-hidden">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-4 border-b border-slate-700 pb-4">
+                        <div class="flex items-center space-x-3">
+                            <label class="font-bold text-sm text-yellow-400">Pilih Benda:</label>
+                            <select id="sim-item-select" onchange="updateSimulation()" class="bg-slate-700 text-white rounded-xl px-3 py-1.5 border border-slate-600 font-bold focus:outline-none focus:border-yellow-400">
+                                <option value="pensil">✏️ Pensil Warna</option>
+                                <option value="krayon">🖍️ Krayon Hijau</option>
+                                <option value="penghapus">🧼 Penghapus Rubber</option>
+                                <option value="paku">📌 Paku Payung</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <label class="font-bold text-sm text-yellow-400">Panjang Benda (cm):</label>
+                            <input type="range" id="sim-length-slider" min="2" max="15" value="8" oninput="updateSimulation()" class="w-32 accent-yellow-400 cursor-pointer">
+                            <span id="sim-length-val" class="font-fun text-xl text-yellow-400 w-12 text-center">8 cm</span>
+                        </div>
+                    </div>
+
+                    <!-- Visual Canvas Area -->
+                    <div id="sim-canvas-container" class="relative bg-slate-900 rounded-2xl h-56 w-full flex flex-col justify-end p-4 border border-slate-700 overflow-x-auto">
+                        
+                        <!-- The Object to Measure -->
+                        <div id="sim-object" class="h-12 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold transition-all duration-300 relative mb-4 shadow-lg border-2 border-emerald-300" style="width: 240px; margin-left: 50px;">
+                            <span id="sim-object-label" class="text-xs drop-shadow">✏️ Pensil Warna (8 cm)</span>
+                        </div>
+
+                        <!-- Interactive Ruler (Can be offset by clicking buttons) -->
+                        <div id="sim-ruler" class="h-16 ruler-container rounded-lg w-full flex items-start text-brandDark font-bold text-xs select-none">
+                            <!-- Tick Marks Generated via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Explanation & Feedback Box -->
+                <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 flex items-start space-x-4">
+                    <div class="text-3xl">💡</div>
+                    <div>
+                        <h4 class="font-bold text-brandBlue text-sm">Hasil Penjelasan Simulasi:</h4>
+                        <p id="sim-explanation" class="text-xs text-gray-700 mt-1">
+                            Ujung kiri benda berada tepat di angka <strong>0 cm</strong> dan ujung kanan berakhir di <strong>8 cm</strong>. Jadi, panjang benda adalah <strong>8 cm (0,08 meter)</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 4. PERMAINAN (Interactive Games) ================= -->
+        <section id="sec-permainan" class="content-section hidden">
+            <div class="glass-card rounded-3xl p-6 md:p-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
+                    <div>
+                        <h2 class="text-3xl font-bold text-brandBlue flex items-center space-x-2">
+                            <span>🎮</span><span>Pusat Permainan Edukasi</span>
+                        </h2>
+                        <p class="text-xs text-gray-500">Pilih jenis permainan untuk menguji pemahamanmu!</p>
+                    </div>
+                    <!-- Level Selector Badge -->
+                    <div class="flex items-center space-x-1 bg-yellow-100 border border-yellow-300 px-3 py-1 rounded-full text-xs font-bold text-yellow-800">
+                        <span>Level Saat Ini:</span>
+                        <span id="game-difficulty-label" class="text-brandPink font-bold">Mudah 🟢</span>
+                    </div>
+                </div>
+
+                <!-- Game Selection Sub-Tabs -->
+                <div class="flex overflow-x-auto space-x-2 border-b-2 border-gray-100 pb-3 mb-6 no-scrollbar">
+                    <button onclick="switchGameTab('openbox')" class="game-tab-btn px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-brandBlue text-white shadow" data-tab="openbox">
+                        📦 Open the Box
+                    </button>
+                    <button onclick="switchGameTab('dragdrop')" class="game-tab-btn px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-gray-100 text-gray-600 hover:bg-gray-200" data-tab="dragdrop">
+                        🎯 Drag & Drop
+                    </button>
+                    <button onclick="switchGameTab('match')" class="game-tab-btn px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-gray-100 text-gray-600 hover:bg-gray-200" data-tab="match">
+                        🧩 Menjodohkan
+                    </button>
+                    <button onclick="switchGameTab('tf')" class="game-tab-btn px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-gray-100 text-gray-600 hover:bg-gray-200" data-tab="tf">
+                        👍 Benar / Salah
+                    </button>
+                    <button onclick="switchGameTab('speed')" class="game-tab-btn px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-gray-100 text-gray-600 hover:bg-gray-200" data-tab="speed">
+                        ⚡ Tantangan Cepat
+                    </button>
+                </div>
+
+                <!-- GAME CONTAINER SLOTS -->
+                <div id="game-stage" class="min-h-[350px]">
+                    <!-- Game 1: Open The Box -->
+                    <div id="game-openbox" class="game-sub-view">
+                        <p class="text-xs text-gray-500 text-center mb-4">Klik salah satu kotak misteri di bawah untuk membuka pertanyaan!</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" id="box-grid">
+                            <!-- Generated via Javascript -->
+                        </div>
+                    </div>
+
+                    <!-- Game 2: Drag and Drop -->
+                    <div id="game-dragdrop" class="game-sub-view hidden">
+                        <p class="text-xs text-gray-500 text-center mb-4">Geser (Drag) atau Klik benda di atas lalu pilih kotak satuan yang tepat di bawah!</p>
+                        <div class="bg-blue-50/50 p-4 rounded-2xl border-2 border-dashed border-blue-200 mb-6">
+                            <h4 class="text-xs font-bold text-gray-400 mb-3 text-center">PILIK BENDA:</h4>
+                            <div class="flex flex-wrap justify-center gap-3" id="drag-items-container">
+                                <!-- Generated via JS -->
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="drop-zones-container">
+                            <!-- Generated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Game 3: Menjodohkan -->
+                    <div id="game-match" class="game-sub-view hidden">
+                        <p class="text-xs text-gray-500 text-center mb-4">Klik satu item di sebelah kiri, lalu klik pasangannya yang cocok di sebelah kanan!</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="match-grid">
+                            <div class="space-y-3" id="match-left"></div>
+                            <div class="space-y-3" id="match-right"></div>
+                        </div>
+                    </div>
+
+                    <!-- Game 4: Benar/Salah -->
+                    <div id="game-tf" class="game-sub-view hidden">
+                        <div class="max-w-xl mx-auto bg-amber-50 border-2 border-amber-200 p-6 rounded-2xl text-center">
+                            <div class="text-xs font-bold text-amber-600 mb-2" id="tf-progress">Soal 1 dari 5</div>
+                            <h3 id="tf-statement" class="text-lg md:text-xl font-bold text-brandDark my-6 min-h-[60px] flex items-center justify-center">
+                                Statement loading...
+                            </h3>
+                            <div class="flex justify-center space-x-4">
+                                <button onclick="answerTF(true)" class="btn-game bg-brandGreen text-white font-fun text-lg px-8 py-3 rounded-xl hover:bg-emerald-600 transition flex items-center space-x-2">
+                                    <span>👍 BENAR</span>
+                                </button>
+                                <button onclick="answerTF(false)" class="btn-game bg-brandPink text-white font-fun text-lg px-8 py-3 rounded-xl hover:bg-pink-600 transition flex items-center space-x-2">
+                                    <span>👎 SALAH</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Game 5: Speed Challenge (Timer) -->
+                    <div id="game-speed" class="game-sub-view hidden">
+                        <div class="max-w-xl mx-auto bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 p-6 rounded-2xl text-center">
+                            <!-- Timer & Score Header -->
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="bg-red-500 text-white px-4 py-1.5 rounded-full font-fun text-base flex items-center space-x-2 shadow">
+                                    <span>⏱️ WAKTU:</span>
+                                    <span id="speed-timer">30</span>
+                                    <span>s</span>
+                                </div>
+                                <div class="bg-purple-600 text-white px-4 py-1.5 rounded-full font-fun text-base shadow">
+                                    SKOR: <span id="speed-score">0</span>
+                                </div>
+                            </div>
+
+                            <div id="speed-start-screen">
+                                <h3 class="font-bold text-xl text-purple-900 mb-2">Tantangan Cepat 30 Detik! ⚡</h3>
+                                <p class="text-xs text-gray-600 mb-6">Jawab pertanyaan konversi satuan sebanyak mungkin sebelum waktu habis!</p>
+                                <button onclick="startSpeedGame()" class="btn-game bg-purple-600 text-white font-fun text-xl px-8 py-3 rounded-2xl hover:bg-purple-700 transition">
+                                    MULAI TANTANGAN! 🚀
+                                </button>
+                            </div>
+
+                            <div id="speed-play-screen" class="hidden">
+                                <h3 id="speed-question" class="text-2xl font-bold text-brandDark my-6">1 m = ... cm</h3>
+                                <div class="grid grid-cols-2 gap-3" id="speed-options">
+                                    <!-- Options generated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback Drawer Modal (Shared) -->
+                <div id="feedback-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                    <div class="bg-white rounded-3xl p-6 max-w-md w-full border-4 border-yellow-400 text-center shadow-2xl transform transition-all scale-95">
+                        <div id="feedback-icon" class="text-6xl mb-3">🎉</div>
+                        <h3 id="feedback-title" class="text-2xl font-bold text-brandDark mb-2">Luar Biasa!</h3>
+                        <p id="feedback-text" class="text-sm text-gray-600 mb-6">Jawabanmu tepat sekali!</p>
+                        <button onclick="closeFeedbackModal()" class="btn-game bg-brandBlue text-white font-fun text-lg px-6 py-2.5 rounded-xl w-full hover:bg-blue-600 transition">
+                            Lanjut Playing! 🚀
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= 5. KUIS PILIHAN GANDA & FILL BLANK ================= -->
+        <section id="sec-kuis" class="content-section hidden">
+            <div class="glass-card rounded-3xl p-6 md:p-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-2">
+                    <div>
+                        <h2 class="text-3xl font-bold text-brandBlue flex items-center space-x-2">
+                            <span>📝</span><span>Kuis Uji Pemahaman</span>
+                        </h2>
+                        <p class="text-xs text-gray-500">Jawab pertanyaan Pilihan Ganda dan Isian Singkat!</p>
+                    </div>
+                    <div class="w-full md:w-48 bg-gray-200 h-4 rounded-full overflow-hidden border border-gray-300">
+                        <div id="quiz-progress-bar" class="bg-brandGreen h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Quiz Card -->
+                <div id="quiz-card" class="bg-white border-2 border-blue-100 rounded-2xl p-6 shadow-sm">
+                    <div class="flex justify-between items-center text-xs font-bold text-gray-400 mb-3">
+                        <span id="quiz-step-label">Soal 1 dari 10</span>
+                        <span id="quiz-type-badge" class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md">Pilihan Ganda</span>
+                    </div>
+
+                    <h3 id="quiz-question" class="text-lg md:text-xl font-bold text-brandDark mb-6">
+                        Loading soal...
+                    </h3>
+
+                    <!-- Choice Container (For Multiple Choice) -->
+                    <div id="quiz-mc-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                        <!-- Options generated JS -->
+                    </div>
+
+                    <!-- Fill Blank Container (For Short Answer) -->
+                    <div id="quiz-fill-container" class="hidden mb-6">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="quiz-fill-input" placeholder="Ketik jawabanmu di sini..." class="w-full bg-blue-50 border-2 border-blue-200 rounded-xl px-4 py-3 text-lg font-bold text-brandDark focus:outline-none focus:border-brandBlue">
+                            <button onclick="submitFillBlank()" class="btn-game bg-brandGreen text-white font-fun px-6 py-3 rounded-xl hover:bg-emerald-600">Jawab</button>
+                        </div>
+                    </div>
+
+                    <!-- Explanation Area (Revealed after answer) -->
+                    <div id="quiz-explanation" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-900 mt-4">
+                        <strong>💡 Penjelasan:</strong> <span id="quiz-exp-text"></span>
+                    </div>
+
+                    <!-- Next Button -->
+                    <div class="mt-6 flex justify-end">
+                        <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden btn-game bg-brandBlue text-white font-fun px-6 py-2.5 rounded-xl hover:bg-blue-600">
+                            Soal Berikutnya ➔
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 6. HASIL & BADGE ================= -->
+        <section id="sec-hasil" class="content-section hidden">
+            <div class="glass-card rounded-3xl p-6 md:p-8 text-center">
+                <div class="max-w-xl mx-auto">
+                    <div class="text-6xl mb-2 animate-bounce">🏆</div>
+                    <h2 class="text-3xl font-extrabold text-brandBlue mb-2">Laporan Hasil Belajar</h2>
+                    <p class="text-xs text-gray-500 mb-6">Hebat! Kamu telah menyelesaikan petualangan pengukuran panjang.</p>
+
+                    <!-- Score Card Summary -->
+                    <div class="bg-gradient-to-r from-yellow-100 via-amber-50 to-yellow-100 border-4 border-yellow-300 rounded-3xl p-6 mb-6 shadow-md">
+                        <div class="text-xs font-bold text-amber-800 tracking-wider uppercase mb-1">TOTAL SKOR AKHIR</div>
+                        <div id="final-score" class="font-fun text-6xl text-brandPink my-2">0</div>
+                        <div id="final-motivation" class="text-sm font-bold text-brandDark">
+                            "Tetap Semangat! Teruslah Berlatih!"
+                        </div>
+                    </div>
+
+                    <!-- Badges Earned Showcase -->
+                    <h3 class="font-bold text-lg text-brandDark mb-4 text-left">Lencana & Badge Penghargaan:</h3>
+                    <div class="grid grid-cols-3 gap-3 mb-8">
+                        <div id="badge-1" class="bg-gray-100 border-2 border-gray-200 rounded-2xl p-3 opacity-50 transition">
+                            <div class="text-3xl mb-1">🥉</div>
+                            <div class="font-bold text-xs text-gray-700">Pemula Ukur</div>
+                            <div class="text-[10px] text-gray-400">Skor > 50</div>
+                        </div>
+                        <div id="badge-2" class="bg-gray-100 border-2 border-gray-200 rounded-2xl p-3 opacity-50 transition">
+                            <div class="text-3xl mb-1">🥈</div>
+                            <div class="font-bold text-xs text-gray-700">Jagoan Meter</div>
+                            <div class="text-[10px] text-gray-400">Skor > 150</div>
+                        </div>
+                        <div id="badge-3" class="bg-gray-100 border-2 border-gray-200 rounded-2xl p-3 opacity-50 transition">
+                            <div class="text-3xl mb-1">🥇</div>
+                            <div class="font-bold text-xs text-gray-700">Master Pengukur</div>
+                            <div class="text-[10px] text-gray-400">Skor > 300</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row justify-center gap-3">
+                        <button onclick="resetAllProgress()" class="btn-game bg-gray-200 text-gray-700 font-fun px-6 py-3 rounded-xl hover:bg-gray-300 transition">
+                            🔄 Ulangi Dari Awal
+                        </button>
+                        <button onclick="showSection('permainan')" class="btn-game bg-brandGreen text-white font-fun px-6 py-3 rounded-xl hover:bg-emerald-600 transition">
+                            🎮 Main Game Lagi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t-2 border-gray-200 py-3 text-center text-xs text-gray-500">
+        <p>© Media Pembelajaran Interaktif Matematika SD Kelas 3 • Satuan Baku Pengukuran Panjang</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* ==========================================================================
+           GLOBAL STATE & AUDIO SYNTHESIZER
+           ========================================================================== */
+        let globalScore = 0;
+        let activeSection = 'beranda';
+        
+        // Simple Audio Synthesizer using Web Audio API (No External Sound Files Needed)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                osc.frequency.exponentialRampToValueAtTime(164.81, audioCtx.currentTime + 0.2); // E3
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.25);
+            } else if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            }
+        }
+
+        function addScore(points) {
+            globalScore += points;
+            document.getElementById('global-score').innerText = globalScore;
+            updateBadges();
+        }
+
+        function updateBadges() {
+            const bHeader = document.getElementById('header-badge');
+            const b1 = document.getElementById('badge-1');
+            const b2 = document.getElementById('badge-2');
+            const b3 = document.getElementById('badge-3');
+
+            if (globalScore >= 300) {
+                bHeader.innerText = '🥇';
+                if(b3) b3.classList.remove('opacity-50');
+                if(b2) b2.classList.remove('opacity-50');
+                if(b1) b1.classList.remove('opacity-50');
+            } else if (globalScore >= 150) {
+                bHeader.innerText = '🥈';
+                if(b2) b2.classList.remove('opacity-50');
+                if(b1) b1.classList.remove('opacity-50');
+            } else if (globalScore >= 50) {
+                bHeader.innerText = '🥉';
+                if(b1) b1.classList.remove('opacity-50');
+            }
+
+            // Update level tag based on score
+            const diffLabel = document.getElementById('game-difficulty-label');
+            if (diffLabel) {
+                if (globalScore < 100) diffLabel.innerHTML = 'Mudah 🟢';
+                else if (globalScore < 250) diffLabel.innerHTML = 'Sedang 🟡';
+                else diffLabel.innerHTML = 'Menantang 🔴';
+            }
+        }
+
+        /* NAVIGATION LOGIC */
+        function showSection(sectionId) {
+            playSound('click');
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`sec-${sectionId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.dataset.target === sectionId) {
+                    btn.classList.add('bg-white/30', 'border-b-2', 'border-white');
+                } else {
+                    btn.classList.remove('bg-white/30', 'border-b-2', 'border-white');
+                }
+            });
+
+            if (sectionId === 'simulasi') renderRuler();
+            if (sectionId === 'hasil') renderFinalResults();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ==========================================================================
+           2. SIMULATION LOGIC
+           ========================================================================== */
+        function renderRuler() {
+            const ruler = document.getElementById('sim-ruler');
+            ruler.innerHTML = '';
+            const totalCm = 20;
+            const containerWidth = ruler.offsetWidth || 600;
+            const pxPerCm = containerWidth / totalCm;
+
+            for (let i = 0; i <= totalCm; i++) {
+                const tick = document.createElement('div');
+                tick.className = 'ruler-tick cm';
+                tick.style.left = `${i * pxPerCm}px`;
+                
+                const label = document.createElement('span');
+                label.className = 'absolute top-1 text-[10px] transform -translate-x-1/2';
+                label.style.left = `${i * pxPerCm}px`;
+                label.innerText = i;
+                
+                ruler.appendChild(tick);
+                ruler.appendChild(label);
+
+                // mm ticks
+                if (i < totalCm) {
+                    for (let j = 1; j < 10; j++) {
+                        const mmTick = document.createElement('div');
+                        mmTick.className = 'ruler-tick mm';
+                        mmTick.style.left = `${(i + j / 10) * pxPerCm}px`;
+                        ruler.appendChild(mmTick);
+                    }
+                }
+            }
+            updateSimulation();
+        }
+
+        function updateSimulation() {
+            const itemType = document.getElementById('sim-item-select').value;
+            const lengthCm = parseInt(document.getElementById('sim-length-slider').value);
+            document.getElementById('sim-length-val').innerText = `${lengthCm} cm`;
+
+            const ruler = document.getElementById('sim-ruler');
+            const containerWidth = ruler.offsetWidth || 600;
+            const pxPerCm = containerWidth / 20;
+
+            const simObj = document.getElementById('sim-object');
+            const simLabel = document.getElementById('sim-object-label');
+
+            let itemEmoji = '✏️';
+            let itemName = 'Pensil Warna';
+            let bgColor = 'bg-emerald-500';
+
+            if (itemType === 'krayon') { itemEmoji = '🖍️'; itemName = 'Krayon Hijau'; bgColor = 'bg-green-500'; }
+            if (itemType === 'penghapus') { itemEmoji = '🧼'; itemName = 'Penghapus Rubber'; bgColor = 'bg-blue-500'; }
+            if (itemType === 'paku') { itemEmoji = '📌'; itemName = 'Paku Payung'; bgColor = 'bg-red-500'; }
+
+            simObj.className = `h-12 ${bgColor} rounded-lg flex items-center justify-center text-white font-bold transition-all duration-300 relative mb-4 shadow-lg border-2 border-white`;
+            simObj.style.width = `${lengthCm * pxPerCm}px`;
+            simObj.style.marginLeft = `0px`; // Fixed aligned to 0
+
+            simLabel.innerHTML = `${itemEmoji} ${itemName} (${lengthCm} cm)`;
+
+            // Cause & Effect Explanation
+            const exp = document.getElementById('sim-explanation');
+            const meterVal = (lengthCm / 100).toFixed(2);
+            exp.innerHTML = `Benda <strong>${itemName}</strong> memiliki panjang <strong>${lengthCm} cm</strong>. Jika diubah ke satuan meter, nilainya setara dengan <strong>${meterVal} m</strong> (karena 1 m = 100 cm).`;
+        }
+
+        /* ==========================================================================
+           3. GAMES LOGIC (5 ACTIVITIES)
+           ========================================================================== */
+        function switchGameTab(tabName) {
+            playSound('click');
+            document.querySelectorAll('.game-sub-view').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`game-${tabName}`).classList.remove('hidden');
+
+            document.querySelectorAll('.game-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tabName) {
+                    btn.classList.replace('bg-gray-100', 'bg-brandBlue');
+                    btn.classList.replace('text-gray-600', 'text-white');
+                } else {
+                    btn.classList.replace('bg-brandBlue', 'bg-gray-100');
+                    btn.classList.replace('text-white', 'text-gray-600');
+                }
+            });
+
+            if (tabName === 'openbox') initOpenBox();
+            if (tabName === 'dragdrop') initDragDrop();
+            if (tabName === 'match') initMatchGame();
+            if (tabName === 'tf') initTFGame();
+            if (tabName === 'speed') resetSpeedGame();
+        }
+
+        /* GAME 1: OPEN THE BOX (5 Boxes) */
+        const boxQuestions = [
+            { q: "Alat untuk mengukur panjang meja kelas yang paling tepat adalah?", a: "Meteran Roll / Pita", options: ["Penggaris Kecil", "Meteran Roll / Pita", "Timbangan"], exp: "Meteran roll cocok untuk benda yang panjang seperti meja." },
+            { q: "1 Meter sama dengan berapa sentimeter?", a: "100 cm", options: ["10 cm", "100 cm", "1000 cm"], exp: "1 m = 100 cm." },
+            { q: "Panjang penghapus papan tulis biasanya diukur dengan satuan?", a: "cm (Sentimeter)", options: ["m (Meter)", "cm (Sentimeter)", "km (Kilometer)"], exp: "Benda pendek diukur dengan sentimeter (cm)." },
+            { q: "Saat mengukur benda dengan penggaris, ujung awal benda diletakkan di angka?", a: "0 (Nol)", options: ["1 (Satu)", "0 (Nol)", "10 (Sepuluh)"], exp: "Pengukuran selalu dimulai dari titik nol." },
+            { q: "Panjang tali 300 cm sama dengan berapa meter?", a: "3 m", options: ["3 m", "30 m", "300 m"], exp: "300 cm : 100 = 3 m." }
+        ];
+
+        function initOpenBox() {
+            const grid = document.getElementById('box-grid');
+            grid.innerHTML = '';
+            boxQuestions.forEach((item, index) => {
+                const box = document.createElement('div');
+                box.className = 'bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl p-6 text-center text-brandDark font-fun text-2xl cursor-pointer hover:scale-105 transition shadow-lg border-4 border-yellow-200 flex flex-col items-center justify-center min-h-[120px]';
+                box.innerHTML = `<i class="fa-solid fa-box-open text-4xl mb-2 text-white"></i><span>KOTAK ${index + 1}</span>`;
+                box.onclick = () => openBoxModal(index);
+                grid.appendChild(box);
+            });
+        }
+
+        function openBoxModal(index) {
+            playSound('click');
+            const q = boxQuestions[index];
+            let optionsHTML = q.options.map(opt => 
+                `<button onclick="checkBoxAnswer('${opt}', '${q.a}', '${q.exp}')" class="bg-blue-50 border-2 border-blue-200 rounded-xl p-3 text-sm font-bold hover:bg-brandBlue hover:text-white transition">${opt}</button>`
+            ).join('');
+
+            showCustomModal(`📦 Kotak ${index + 1}`, q.q, optionsHTML);
+        }
+
+        function checkBoxAnswer(chosen, correct, exp) {
+            if (chosen === correct) {
+                playSound('correct');
+                addScore(20);
+                showFeedback(true, `Benar sekali! ${exp}`);
+            } else {
+                playSound('wrong');
+                showFeedback(false, `Kurang tepat. ${exp}`);
+            }
+        }
+
+        /* GAME 2: DRAG AND DROP (5 Objects) */
+        const dragData = [
+            { id: 1, name: "📏 Pensil (15 cm)", target: "cm" },
+            { id: 2, name: "🚪 Pintu Kelas (2 m)", target: "m" },
+            { id: 3, name: "📎 Klip Kertas (3 cm)", target: "cm" },
+            { id: 4, name: "🏫 Lapangan (25 m)", target: "m" },
+            { id: 5, name: "🔑 Kunci Rumah (5 cm)", target: "cm" }
+        ];
+
+        let selectedDragItem = null;
+
+        function initDragDrop() {
+            const itemContainer = document.getElementById('drag-items-container');
+            const zoneContainer = document.getElementById('drop-zones-container');
+
+            itemContainer.innerHTML = '';
+            zoneContainer.innerHTML = '';
+
+            dragData.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'draggable-item bg-white border-2 border-brandBlue px-4 py-2 rounded-xl text-xs font-bold shadow-sm hover:shadow cursor-pointer select-none';
+                el.innerText = item.name;
+                el.draggable = true;
+
+                // Drag Events
+                el.ondragstart = (e) => {
+                    e.dataTransfer.setData('text/plain', JSON.stringify(item));
+                    selectedDragItem = item;
+                };
+
+                // Click-to-Select Fallback for Mobile
+                el.onclick = () => {
+                    playSound('click');
+                    document.querySelectorAll('.draggable-item').forEach(i => i.classList.remove('ring-4', 'ring-yellow-400'));
+                    el.classList.add('ring-4', 'ring-yellow-400');
+                    selectedDragItem = item;
+                };
+
+                itemContainer.appendChild(el);
+            });
+
+            // Zones: m and cm
+            const zones = [
+                { type: 'cm', label: '📏 Satuan Sentimeter (cm) - Benda Pendek' },
+                { type: 'm', label: '🏢 Satuan Meter (m) - Benda Panjang' }
+            ];
+
+            zones.forEach(z => {
+                const zone = document.createElement('div');
+                zone.className = 'bg-gray-50 border-4 border-dashed border-gray-300 rounded-2xl p-4 text-center min-h-[140px] flex flex-col items-center justify-start transition';
+                zone.innerHTML = `<h5 class="font-bold text-xs text-gray-500 mb-3">${z.label}</h5><div class="dropped-items flex flex-wrap gap-2 justify-center w-full"></div>`;
+
+                zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('drop-zone-active'); };
+                zone.ondragleave = () => { zone.classList.remove('drop-zone-active'); };
+                zone.ondrop = (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drop-zone-active');
+                    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    handleDrop(data, z.type, zone);
+                };
+
+                // Click Zone Fallback
+                zone.onclick = () => {
+                    if (selectedDragItem) {
+                        handleDrop(selectedDragItem, z.type, zone);
+                        selectedDragItem = null;
+                    }
+                };
+
+                zoneContainer.appendChild(zone);
+            });
+        }
+
+        function handleDrop(item, zoneType, zoneEl) {
+            if (item.target === zoneType) {
+                playSound('correct');
+                addScore(20);
+                const droppedBox = zoneEl.querySelector('.dropped-items');
+                const badge = document.createElement('span');
+                badge.className = 'bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-lg border border-emerald-300';
+                badge.innerText = item.name;
+                droppedBox.appendChild(badge);
+
+                // Hide original
+                document.querySelectorAll('.draggable-item').forEach(el => {
+                    if (el.innerText === item.name) el.remove();
+                });
+                showFeedback(true, `Tepat! ${item.name} cocok diaplikasikan pada satuan ${zoneType.toUpperCase()}.`);
+            } else {
+                playSound('wrong');
+                showFeedback(false, `Coba lagi! ${item.name} kurang tepat ditaruh di kelompok ini.`);
+            }
+        }
+
+        /* GAME 3: MENJODOHKAN (5 Pairs) */
+        const matchPairs = [
+            { id: 1, left: "100 cm", right: "1 m" },
+            { id: 2, left: "200 cm", right: "2 m" },
+            { id: 3, left: "5 m", right: "500 cm" },
+            { id: 4, left: "10 m", right: "1000 cm" },
+            { id: 5, left: "50 cm + 50 cm", right: "1 m" }
+        ];
+
+        let selectedLeft = null;
+        let selectedRight = null;
+
+        function initMatchGame() {
+            const leftCol = document.getElementById('match-left');
+            const rightCol = document.getElementById('match-right');
+            leftCol.innerHTML = '';
+            rightCol.innerHTML = '';
+
+            // Shuffle right items
+            const shuffledRight = [...matchPairs].sort(() => Math.random() - 0.5);
+
+            matchPairs.forEach(pair => {
+                const btnL = document.createElement('button');
+                btnL.className = 'w-full bg-blue-50 border-2 border-blue-200 text-brandBlue font-bold py-3 px-4 rounded-xl text-xs hover:bg-blue-100 transition text-left flex justify-between items-center';
+                btnL.innerHTML = `<span>${pair.left}</span> <i class="fa-solid fa-circle-dot text-blue-300"></i>`;
+                btnL.onclick = () => selectMatch('left', pair, btnL);
+                leftCol.appendChild(btnL);
+            });
+
+            shuffledRight.forEach(pair => {
+                const btnR = document.createElement('button');
+                btnR.className = 'w-full bg-purple-50 border-2 border-purple-200 text-brandPurple font-bold py-3 px-4 rounded-xl text-xs hover:bg-purple-100 transition text-left flex justify-between items-center';
+                btnR.innerHTML = `<i class="fa-solid fa-circle-dot text-purple-300"></i> <span>${pair.right}</span>`;
+                btnR.onclick = () => selectMatch('right', pair, btnR);
+                rightCol.appendChild(btnR);
+            });
+        }
+
+        function selectMatch(side, pairObj, element) {
+            playSound('click');
+            if (side === 'left') {
+                document.querySelectorAll('#match-left button').forEach(b => b.classList.remove('ring-4', 'ring-yellow-400'));
+                element.classList.add('ring-4', 'ring-yellow-400');
+                selectedLeft = { pair: pairObj, el: element };
+            } else {
+                document.querySelectorAll('#match-right button').forEach(b => b.classList.remove('ring-4', 'ring-yellow-400'));
+                element.classList.add('ring-4', 'ring-yellow-400');
+                selectedRight = { pair: pairObj, el: element };
+            }
+
+            if (selectedLeft && selectedRight) {
+                if (selectedLeft.pair.id === selectedRight.pair.id) {
+                    playSound('correct');
+                    addScore(20);
+                    selectedLeft.el.className = 'w-full bg-emerald-100 border-2 border-emerald-400 text-emerald-800 font-bold py-3 px-4 rounded-xl text-xs opacity-60 cursor-default flex justify-between items-center';
+                    selectedRight.el.className = 'w-full bg-emerald-100 border-2 border-emerald-400 text-emerald-800 font-bold py-3 px-4 rounded-xl text-xs opacity-60 cursor-default flex justify-between items-center';
+                    selectedLeft.el.onclick = null;
+                    selectedRight.el.onclick = null;
+                    showFeedback(true, "Pasangan Cocok Sempurna! 🎉");
+                } else {
+                    playSound('wrong');
+                    showFeedback(false, "Pasangan belum cocok. Coba dipikirkan lagi ya!");
+                    selectedLeft.el.classList.remove('ring-4', 'ring-yellow-400');
+                    selectedRight.el.classList.remove('ring-4', 'ring-yellow-400');
+                }
+                selectedLeft = null;
+                selectedRight = null;
+            }
+        }
+
+        /* GAME 4: BENAR / SALAH (5 Questions) */
+        const tfQuestions = [
+            { statement: "Penggaris biasanya memiliki satuan sentimeter (cm).", answer: true, exp: "Benar! Penggaris sekolah umumnya menggunakan satuan sentimeter (cm)." },
+            { statement: "Panjang 4 meter sama dengan 40 sentimeter.", answer: false, exp: "Salah! 4 meter itu sama dengan 400 sentimeter (4 x 100)." },
+            { statement: "Mengukur panjang meja harus dimulai dari angka 1 pada penggaris.", answer: false, exp: "Salah! Mengukur panjang harus dimulai dari angka 0." },
+            { statement: "Meteran pita biasa digunakan oleh penjahit untuk mengukur kain.", answer: true, exp: "Benar! Penjahit menggunakan meteran pita fleksibel." },
+            { statement: "100 cm lebih panjang daripada 2 m.", answer: false, exp: "Salah! 100 cm = 1 m, jadi 2 m lebih panjang." }
+        ];
+        let currentTFIndex = 0;
+
+        function initTFGame() {
+            currentTFIndex = 0;
+            renderTFQuestion();
+        }
+
+        function renderTFQuestion() {
+            if (currentTFIndex >= tfQuestions.length) {
+                showFeedback(true, "Selamat! Kamu telah menyelesaikan semua soal Benar/Salah! 🎉");
+                currentTFIndex = 0;
+            }
+            const q = tfQuestions[currentTFIndex];
+            document.getElementById('tf-progress').innerText = `Soal ${currentTFIndex + 1} dari ${tfQuestions.length}`;
+            document.getElementById('tf-statement').innerText = `"${q.statement}"`;
+        }
+
+        function answerTF(userChoice) {
+            const q = tfQuestions[currentTFIndex];
+            if (userChoice === q.answer) {
+                playSound('correct');
+                addScore(20);
+                showFeedback(true, `Jawabanmu Tepat! ${q.exp}`);
+            } else {
+                playSound('wrong');
+                showFeedback(false, `Kurang Tepat. ${q.exp}`);
+            }
+            currentTFIndex++;
+            renderTFQuestion();
+        }
+
+        /* GAME 5: TANTANGAN CEPAT WITH TIMER */
+        let speedTimerInterval;
+        let speedTimeLeft = 30;
+        let speedScoreLocal = 0;
+
+        const speedBank = [
+            { q: "1 m = ... cm", a: "100 cm", opts: ["10 cm", "100 cm", "1000 cm", "50 cm"] },
+            { q: "200 cm = ... m", a: "2 m", opts: ["2 m", "20 m", "0.2 m", "200 m"] },
+            { q: "5 m = ... cm", a: "500 cm", opts: ["50 cm", "500 cm", "5000 cm", "5 m"] },
+            { q: "300 cm = ... m", a: "3 m", opts: ["3 m", "30 m", "300 m", "1 m"] },
+            { q: "Satuan baku panjang:", a: "Meter", opts: ["Meter", "Kilogram", "Liter", "Detik"] }
+        ];
+
+        function resetSpeedGame() {
+            clearInterval(speedTimerInterval);
+            document.getElementById('speed-start-screen').classList.remove('hidden');
+            document.getElementById('speed-play-screen').classList.add('hidden');
+            document.getElementById('speed-timer').innerText = '30';
+        }
+
+        function startSpeedGame() {
+            playSound('click');
+            speedTimeLeft = 30;
+            speedScoreLocal = 0;
+            document.getElementById('speed-score').innerText = speedScoreLocal;
+            document.getElementById('speed-start-screen').classList.add('hidden');
+            document.getElementById('speed-play-screen').classList.remove('hidden');
+
+            renderSpeedQuestion();
+
+            speedTimerInterval = setInterval(() => {
+                speedTimeLeft--;
+                document.getElementById('speed-timer').innerText = speedTimeLeft;
+                if (speedTimeLeft <= 0) {
+                    clearInterval(speedTimerInterval);
+                    playSound('correct');
+                    addScore(speedScoreLocal);
+                    showFeedback(true, `Waktu Habis! Kamu berhasil mengumpulkan ${speedScoreLocal} poin bonus dalam Tantangan Cepat! ⚡`);
+                    resetSpeedGame();
+                }
+            }, 1000);
+        }
+
+        function renderSpeedQuestion() {
+            const randomQ = speedBank[Math.floor(Math.random() * speedBank.length)];
+            document.getElementById('speed-question').innerText = randomQ.q;
+            const container = document.getElementById('speed-options');
+            container.innerHTML = '';
+
+            randomQ.opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-game bg-white border-2 border-purple-300 rounded-xl p-3 text-sm font-bold text-purple-900 hover:bg-purple-100 transition';
+                btn.innerText = opt;
+                btn.onclick = () => {
+                    if (opt === randomQ.a) {
+                        playSound('correct');
+                        speedScoreLocal += 10;
+                        document.getElementById('speed-score').innerText = speedScoreLocal;
+                    } else {
+                        playSound('wrong');
+                    }
+                    renderSpeedQuestion();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        /* MODAL & FEEDBACK HELPER */
+        function showFeedback(isSuccess, message) {
+            const modal = document.getElementById('feedback-modal');
+            document.getElementById('feedback-icon').innerText = isSuccess ? '🎉' : '💡';
+            document.getElementById('feedback-title').innerText = isSuccess ? 'Hebat Sekali!' : 'Yuk Pelajari Lagi!';
+            document.getElementById('feedback-text').innerText = message;
+            modal.classList.remove('hidden');
+            
+            if (isSuccess && typeof confetti === 'function') {
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+            }
+        }
+
+        function closeFeedbackModal() {
+            playSound('click');
+            document.getElementById('feedback-modal').classList.add('hidden');
+        }
+
+        function showCustomModal(title, question, optionsHTML) {
+            document.getElementById('feedback-icon').innerText = '❓';
+            document.getElementById('feedback-title').innerText = title;
+            document.getElementById('feedback-text').innerHTML = `
+                <p class="font-bold text-base mb-4 text-brandDark">${question}</p>
+                <div class="grid grid-cols-1 gap-2">${optionsHTML}</div>
+            `;
+            document.getElementById('feedback-modal').classList.remove('hidden');
+        }
+
+        /* ==========================================================================
+           4. KUIS MAIN LOGIC (PG + FILL IN THE BLANK)
+           ========================================================================== */
+        const mainQuizBank = [
+            { type: 'mc', q: "1. Penggaris adalah alat yang paling tepat untuk mengukur panjang...", opts: ["A. Pensil", "B. Lapangan Bola", "C. Jalan Raya", "D. Tali Perahu"], a: 0, exp: "Pensil berukuran pendek sehingga tepat diukur dengan penggaris sentimeter." },
+            { type: 'mc', q: "2. Panjang pita Rina adalah 2 m. Jika diubah ke cm, panjangnya adalah...", opts: ["A. 20 cm", "B. 200 cm", "C. 2000 cm", "D. 2 cm"], a: 1, exp: "2 m = 2 x 100 cm = 200 cm." },
+            { type: 'mc', q: "3. Ibu membeli kain sepanjang 500 cm. Panjang kain tersebut sama dengan... meter.", opts: ["A. 5 m", "B. 50 m", "C. 500 m", "D. 0.5 m"], a: 0, exp: "500 cm : 100 = 5 m." },
+            { type: 'mc', q: "4. Angka awal pada penggaris yang dihimptkan dengan ujung benda adalah...", opts: ["A. 1", "B. 0", "C. 10", "D. Bebas"], a: 1, exp: "Pengukuran tepat selalu dimulai dari titik nol (0)." },
+            { type: 'mc', q: "5. Benda berikut yang sebaiknya diukur dengan meteran pita penjahit adalah...", opts: ["A. Buku Tulis", "B. Lingkar Pinggang", "C. Penghapus", "D. Pensil Warna"], a: 1, exp: "Meteran pita lentur sehingga mudah untuk mengukur lingkar tubuh/pinggang." },
+            // Fill in the blank
+            { type: 'fill', q: "6. Satuan baku cm merupakan singkat dari nama satuan...", a: "sentimeter", exp: "cm adalah singkatan resmi dari Sentimeter." },
+            { type: 'fill', q: "7. 4 meter sama dengan berapa sentimeter? (Jawab angkanya saja)", a: "400", exp: "4 x 100 = 400 cm." },
+            { type: 'fill', q: "8. Alat untuk mengukur panjang benda dinamakan...", a: "penggaris", exp: "Penggaris / meteran adalah alat pengukur panjang." },
+            { type: 'fill', q: "9. 700 cm = ... m (Jawab angkanya saja)", a: "7", exp: "700 : 100 = 7 m." },
+            { type: 'fill', q: "10. Jika 1 m = 100 cm, maka 10 m = ... cm (Jawab angkanya saja)", a: "1000", exp: "10 x 100 = 1000 cm." }
+        ];
+
+        let currentQuizIndex = 0;
+
+        function initQuiz() {
+            currentQuizIndex = 0;
+            renderQuizStep();
+        }
+
+        function renderQuizStep() {
+            const q = mainQuizBank[currentQuizIndex];
+            const total = mainQuizBank.length;
+
+            document.getElementById('quiz-progress-bar').style.width = `${((currentQuizIndex + 1) / total) * 100}%`;
+            document.getElementById('quiz-step-label').innerText = `Soal ${currentQuizIndex + 1} dari ${total}`;
+            document.getElementById('quiz-type-badge').innerText = q.type === 'mc' ? 'Pilihan Ganda' : 'Isian Singkat';
+            document.getElementById('quiz-question').innerText = q.q;
+
+            document.getElementById('quiz-explanation').classList.add('hidden');
+            document.getElementById('quiz-next-btn').classList.add('hidden');
+
+            const mcBox = document.getElementById('quiz-mc-options');
+            const fillBox = document.getElementById('quiz-fill-container');
+
+            if (q.type === 'mc') {
+                mcBox.classList.remove('hidden');
+                fillBox.classList.add('hidden');
+                mcBox.innerHTML = '';
+
+                q.opts.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'bg-gray-50 border-2 border-gray-200 text-left p-4 rounded-xl text-sm font-bold hover:bg-blue-50 hover:border-blue-300 transition text-brandDark';
+                    btn.innerText = opt;
+                    btn.onclick = () => checkQuizMC(idx, btn);
+                    mcBox.appendChild(btn);
+                });
+            } else {
+                mcBox.classList.add('hidden');
+                fillBox.classList.remove('hidden');
+                document.getElementById('quiz-fill-input').value = '';
+            }
+        }
+
+        function checkQuizMC(chosenIdx, btnEl) {
+            const q = mainQuizBank[currentQuizIndex];
+            const buttons = document.querySelectorAll('#quiz-mc-options button');
+            buttons.forEach(b => b.disabled = true);
+
+            if (chosenIdx === q.a) {
+                playSound('correct');
+                btnEl.classList.replace('bg-gray-50', 'bg-emerald-100');
+                btnEl.classList.replace('border-gray-200', 'border-emerald-400');
+                addScore(20);
+            } else {
+                playSound('wrong');
+                btnEl.classList.replace('bg-gray-50', 'bg-rose-100');
+                btnEl.classList.replace('border-gray-200', 'border-rose-400');
+                buttons[q.a].classList.replace('bg-gray-50', 'bg-emerald-100');
+            }
+
+            showQuizExplanation(q.exp);
+        }
+
+        function submitFillBlank() {
+            const q = mainQuizBank[currentQuizIndex];
+            const userAns = document.getElementById('quiz-fill-input').value.trim().toLowerCase();
+
+            if (userAns === q.a.toLowerCase()) {
+                playSound('correct');
+                addScore(20);
+                showQuizExplanation(`Luar Biasa! Jawabanmu Tepat! ${q.exp}`);
+            } else {
+                playSound('wrong');
+                showQuizExplanation(`Kurang tepat. Jawaban yang benar adalah "${q.a}". ${q.exp}`);
+            }
+        }
+
+        function showQuizExplanation(text) {
+            document.getElementById('quiz-exp-text').innerText = text;
+            document.getElementById('quiz-explanation').classList.remove('hidden');
+            document.getElementById('quiz-next-btn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            playSound('click');
+            currentQuizIndex++;
+            if (currentQuizIndex < mainQuizBank.length) {
+                renderQuizStep();
+            } else {
+                showSection('hasil');
+            }
+        }
+
+        /* ==========================================================================
+           5. HASIL & RESET LOGIC
+           ========================================================================== */
+        function renderFinalResults() {
+            document.getElementById('final-score').innerText = globalScore;
+            const moti = document.getElementById('final-motivation');
+
+            if (globalScore >= 300) {
+                moti.innerText = "🌟 Luar Biasa! Kamu adalah Master Pengukuran Panjang SD Kelas 3!";
+                if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70 });
+            } else if (globalScore >= 150) {
+                moti.innerText = "👍 Hebat! Pemahamanmu sudah sangat baik. Tingkatkan sedikit lagi!";
+            } else {
+                moti.innerText = "💪 Tetap semangat! Ayo ulas kembali materi dan coba permainan lagi!";
+            }
+        }
+
+        function resetAllProgress() {
+            playSound('click');
+            globalScore = 0;
+            document.getElementById('global-score').innerText = '0';
+            updateBadges();
+            initQuiz();
+            showSection('beranda');
+        }
+
+        /* INITIALIZATION ON WINDOW LOAD */
+        window.onload = function() {
+            renderRuler();
+            initOpenBox();
+            initDragDrop();
+            initMatchGame();
+            initTFGame();
+            initQuiz();
+        };
+    </script>
+</body>
+</html>
